@@ -6,11 +6,22 @@ import getopt
 import email.parser
 
 def usage():
-    pass
+    print """
+    Take an RFC-compliant e-mail message on STDIN and add a
+    corresponding task to the OmniFocus inbox for it.
+
+    Options:
+        -h, --help
+            Display this help text.
+
+        -q, --quick-entry
+            Use the quick entry panel instead of directly creating a task.
+    """
 
 def applescript_escape(string):
     """Applescript requires backslashes and double quotes to be escaped in 
-    string.  This returns the escaped string."""
+    string.  This returns the escaped string.
+    """
     # Backslashes first (else you end up escaping your escapes)
     string = string.replace('\\', '\\\\')
 
@@ -23,7 +34,8 @@ def parse_message(raw):
     """Parse a string containing an e-mail and produce a list containing the
     significant headers.  Each element is a tuple containing the name and 
     content of the header (list of tuples rather than dictionary to preserve
-    order)."""
+    order).
+    """
 
     # Create a Message object
     message = email.parser.Parser().parsestr(raw, headersonly=True)
@@ -38,7 +50,8 @@ def parse_message(raw):
 
 def send_to_omnifocus(params, quickentry=False):
     """Take the list of significant headers and create an OmniFocus inbox item
-    from these."""
+    from these.
+    """
 
     # name and note of the task (escaped as per applescript_escape())
     name = "Mutt: %s" % applescript_escape(dict(params)["Subject"])
@@ -71,12 +84,14 @@ def send_to_omnifocus(params, quickentry=False):
     os.system("\n".join(["osascript << EOT", applescript, "EOT"]))
 
 def main():
+    # Check for options
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hq", ["help", "quick-entry"])
     except getopt.GetoptError:
         usage()
         sys.exit(-1)
 
+    # If an option was specified, do the right thing
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             usage()
@@ -85,7 +100,8 @@ def main():
             raw = sys.stdin.read()
             send_to_omnifocus(parse_message(raw), quickentry=True)
             sys.exit(0)
-    
+
+    # Otherwise fall back to standard operation
     raw = sys.stdin.read()
     send_to_omnifocus(parse_message(raw), quickentry=False)
     sys.exit(0)
