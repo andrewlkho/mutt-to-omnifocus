@@ -2,7 +2,11 @@
 
 import sys
 import os
+import getopt
 import email.parser
+
+def usage():
+    pass
 
 def applescript_escape(string):
     """Applescript requires backslashes and double quotes to be escaped in 
@@ -32,7 +36,7 @@ def parse_message(raw):
 
     return list
 
-def send_to_omnifocus(params):
+def send_to_omnifocus(params, quickentry=False):
     """Take the list of significant headers and create an OmniFocus inbox item
     from these."""
 
@@ -41,20 +45,50 @@ def send_to_omnifocus(params):
     note = "\n".join(["%s: %s" % (k, applescript_escape(v)) for (k, v) in params])
 
     # Write the Applescript
-    applescript = """
-        tell application "OmniFocus"
-            tell default document
-                make new inbox task with properties {name:"%s", note:"%s"}
+    if quickentry:
+        applescript = """
+            tell application "OmniFocus"
+                tell default document
+                    tell quick entry
+                        open
+                        make new inbox task with properties {name: "%s", note:"%s"}
+                        select tree 1
+                        set note expanded of tree 1 to true
+                    end tell
+                end tell
             end tell
-        end tell
-    """ % (name, note)
+        """ % (name, note)
+    else:
+        applescript = """
+            tell application "OmniFocus"
+                tell default document
+                    make new inbox task with properties {name: "%s", note:"%s"}
+                end tell
+            end tell
+        """ % (name, note)
 
     # Use osascript and a heredoc to run this Applescript
     os.system("\n".join(["osascript << EOT", applescript, "EOT"]))
 
 def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hq", ["help", "quick-entry"])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(-1)
+
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit(0)
+        elif opt in ("-q", "--quick-entry"):
+            raw = sys.stdin.read()
+            send_to_omnifocus(parse_message(raw), quickentry=True)
+            sys.exit(0)
+    
     raw = sys.stdin.read()
-    send_to_omnifocus(parse_message(raw))
+    send_to_omnifocus(parse_message(raw), quickentry=False)
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

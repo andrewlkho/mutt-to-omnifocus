@@ -23,12 +23,11 @@ following in your mutt configuration files:
     macro index,pager \cL "<pipe-message>mutt-to-omnifocus.py<enter>" \
         "Create OmniFocus task from message"
 
+If you want to bring up the task in the quick entry panel instead, use the `-q`
+option:
 
-TODO
-====
-
-- `-q` option to bring up the quick entry panel
-- `message://` links
+    macro index,pager \cL "<pipe-message>mutt-to-omnifocus.py -q<enter>" \
+        "Create OmniFocus task from message"
 
 
 -- Andrew Ho <andrewho@andrewho.co.uk>
