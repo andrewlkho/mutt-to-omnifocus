@@ -22,11 +22,12 @@ def applescript_escape(string):
     """Applescript requires backslashes and double quotes to be escaped in 
     string.  This returns the escaped string.
     """
-    # Backslashes first (else you end up escaping your escapes)
-    string = string.replace('\\', '\\\\')
+    if string is not None:
+        # Backslashes first (else you end up escaping your escapes)
+        string = string.replace('\\', '\\\\')
 
-    # Then double quotes
-    string = string.replace('"', '\\"')
+        # Then double quotes
+        string = string.replace('"', '\\"')
 
     return string
 
