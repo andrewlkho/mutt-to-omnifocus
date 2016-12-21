@@ -66,7 +66,6 @@ def send_to_omnifocus(params, quickentry=False):
                     tell quick entry
                         open
                         make new inbox task with properties {name: "%s", note:"%s"}
-                        select tree 1
                         set note expanded of tree 1 to true
                     end tell
                 end tell
